@@ -1,0 +1,28 @@
+@startuml
+
+title University Registration System - Course Registration Sequence Diagram
+
+actor Student
+
+participant "Registration API" as API
+participant "Student Service" as Service
+participant "Course Repository" as CourseRepo
+participant "Enrollment Repository" as EnrollmentRepo
+
+Student -> API: Submit course registration request
+API -> Service: registerStudentInCourse(studentId, courseId)
+
+Service -> CourseRepo: checkCourseAvailability(courseId)
+CourseRepo --> Service: course availability result
+
+alt Course has available seats
+    Service -> EnrollmentRepo: createEnrollment(studentId, courseId)
+    EnrollmentRepo --> Service: enrollment created
+    Service --> API: registration successful
+    API --> Student: 201 Created - Course registered successfully
+else Course is full or unavailable
+    Service --> API: registration failed
+    API --> Student: 400 Bad Request - Course is not available
+end
+
+@enduml
